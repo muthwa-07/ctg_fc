@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Player Stats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">📊 Add Player Stats</h4>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('add_stats') }}">
+                <div class="mb-3">
+                    <label for="player_name" class="form-label">Player Name</label>
+                    <input type="text" name="player_name" id="player_name" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="goals" class="form-label">Goals</label>
+                    <input type="number" name="goals" id="goals" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="assists" class="form-label">Assists</label>
+                    <input type="number" name="assists" id="assists" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="rating" class="form-label">Player Rating</label>
+                    <input type="number" step="0.1" name="rating" id="rating" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="cardings" class="form-label">Cardings</label>
+                    <input type="text" name="cardings" id="cardings" class="form-control">
+                </div>
+
+                <div class="mb-4">
+                    <label for="match_id" class="form-label">Select Match</label>
+                    <select name="match_id" id="match_id" class="form-select" required>
+                        {% for match in matches %}
+                            <option value="{{ match.id }}">{{ match.match_result }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success">Submit Stats</button>
+                <a href="{{ url_for('fixtures') }}" class="btn btn-outline-secondary ms-2">← Back to Fixtures</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

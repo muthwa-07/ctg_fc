@@ -136,6 +136,120 @@ def register():
         return render_template("register.html", message=message)
 
 
+
+
+# Match statistics route
+@app.route('/stats')
+def stats():
+    total_matches = Match.query.count()
+    past_matches = Match.query.filter(Match.date < datetime.today().date()).count()
+    upcoming_matches = Match.query.filter(Match.date >= datetime.today().date()).count()
+
+    # Example: Count matches per location (could show most common stadium)
+    location_stats = db.session.query(
+        Match.match_location, db.func.count(Match.match_location)
+    ).group_by(Match.match_location).all()
+
+    return render_template('stats.html', 
+                           total_matches=total_matches, 
+                           past_matches=past_matches,
+                           upcoming_matches=upcoming_matches,
+                           location_stats=location_stats)
+
+
+
+
+@app.route("/add_stats", methods=["GET", "POST"])
+def add_stats():
+    if request.method == "GET":
+        # Fetch all matches to display in dropdown
+        connection = pymysql.connect(host="localhost", user="root", password="", database="ctg_fc")
+        cursor = connection.cursor(pymysql.cursors.DictCursor)
+        cursor.execute("SELECT id, match_result FROM matches")  # ✅ FIXED table name
+        matches = cursor.fetchall()
+        cursor.close()
+        connection.close()
+
+        return render_template("add_stats.html", matches=matches)
+
+    else:
+        # Process form submission
+        player_name = request.form["player_name"]
+        goals = request.form["goals"]
+        assists = request.form["assists"]
+        rating = request.form["rating"]
+        cardings = request.form["cardings"]
+        match_id = request.form["match_id"]
+
+        # Insert into stats table
+        connection = pymysql.connect(host="localhost", user="root", password="", database="ctg_fc")
+        cursor = connection.cursor()
+        sql = """
+            INSERT INTO stats (player_name, goals, assists, player_ratings, cardings, match_id)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        data = (player_name, goals, assists, rating, cardings, match_id)
+        cursor.execute(sql, data)
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        return redirect(url_for("view_stats"))
+
+
+
+
+
+
+
+
+
+@app.route("/view_stats")
+def view_stats():
+    connection = pymysql.connect(host="localhost", user="root", password="", database="ctg_fc")
+    cursor = connection.cursor(pymysql.cursors.DictCursor)  # Optional: use dicts
+
+    sql = "SELECT id, player_name, goals, assists, player_ratings, cardings FROM stats"
+    cursor.execute(sql)
+    stats = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return render_template("view_stats.html", stats=stats)
+
+
+
+
+
+@app.route("/match_stats/<int:match_id>")
+def match_stats(match_id):
+    connection = pymysql.connect(host="localhost", user="root", password="", database="ctg_fc")
+    cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+    # ✅ FIXED: table name is now matches
+    cursor.execute("SELECT * FROM matches WHERE id = %s", (match_id,))
+    match = cursor.fetchone()
+
+    # Get stats for that match
+    cursor.execute("""
+        SELECT player_name, goals, assists, player_ratings, cardings
+        FROM stats WHERE match_id = %s
+    """, (match_id,))
+    stats = cursor.fetchall()
+
+    cursor.close()
+    connection.close()
+
+    return render_template("match_stats.html", match=match, stats=stats)
+
+
+
+
+
+
+
+
 # Create database tables and run app
 if __name__ == '__main__':
     with app.app_context():

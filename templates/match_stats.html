@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Match Stats</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <h2 class="mb-4">📊 Stats for Match: {{ match['match_result'] }}</h2>
+
+    {% if stats %}
+    <table class="table table-bordered bg-white">
+        <thead class="table-dark">
+            <tr>
+                <th>Player</th>
+                <th>Goals</th>
+                <th>Assists</th>
+                <th>Rating</th>
+                <th>Cardings</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in stats %}
+            <tr>
+                <td>{{ stat['player_name'] }}</td>
+                <td>{{ stat['goals'] }}</td>
+                <td>{{ stat['assists'] }}</td>
+                <td>{{ stat['player_ratings'] }}</td>
+                <td>{{ stat['cardings'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-warning">No stats available for this match.</div>
+    {% endif %}
+
+    <a href="{{ url_for('fixtures') }}" class="btn btn-link mt-3">← Back to Fixtures</a>
+</div>
+</body>
+</html>
